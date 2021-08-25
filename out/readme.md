@@ -1,0 +1,1 @@
+This folder contains the resulting plots created by these scripts.
