@@ -8,12 +8,9 @@ DPI = 96
 mpl.rcParams['figure.figsize'] = 1920 / DPI, 1080 / DPI
 mpl.rcParams['savefig.dpi'] = DPI
 
-os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\modified')
-
 # Read from file
 print('Reading data...')
-# data = pd.read_pickle(r'Balance_Demand.pkl')
-data = pd.read_pickle(r'Balance_Demand_Mod.pkl')
+data = pd.read_pickle(r'modified\Balance_Demand_Mod.pkl')
 # data.loc[data['Net Generation (MW) (Adjusted)'] == 0, 'Net Generation (MW) (Adjusted)'] = np.nan
 data.index = data.index - pd.Timedelta(hours=8)
 # data = data.resample(rule='H').asfreq(fill_value=np.nan)
@@ -28,13 +25,16 @@ other_cols = ['Net Generation (MW) (Adjusted)']
 
 bal_areas = sorted(list(set(data.loc[:, 'Balancing Authority'])))
 
-
+if not os.path.exists(r'out\BA Charts by Type\Generation Heatmaps'):
+    os.makedirs(r'out\BA Charts by Type\Generation Heatmaps')
+if not os.path.exists(r'out\BA Charts by Type\Generation Ramp Heatmaps'):
+    os.makedirs(r'out\BA Charts by Type\Generation Ramp Heatmaps')
 
 # Demand  and Ramp Heatmaps
 for ba in bal_areas:
 # for ba in ['AVA']:
     print(f'\nBeginning processing for {ba}...')
-    data_sel = data.loc[data['Balancing Authority'] == ba, ['Week_no', 'Weekday', 'Weekday-Hour', 'Net Generation (MW) (Adjusted)']]
+    data_sel = data.loc[data['Balancing Authority'] == ba, ['Week_no', 'Weekday', 'Weekday-Hour', 'Net Generation (MW) (Adjusted)']].sort_index()
     if data_sel['Net Generation (MW) (Adjusted)'].sum() == 0:
         continue
     print(f'Processing generation data...')
@@ -72,14 +72,10 @@ for ba in bal_areas:
     
     plt.tight_layout()
 
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Generation Heatmaps')
-    plt.savefig(f'{ba} EIA 930 Generation Heatmap')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    try:
-        os.mkdir(f'{ba}')
-    except FileExistsError:
-        pass
-    plt.savefig(f'{ba}\\{ba} EIA 930 Generation Heatmap')
+    if not os.path.exists(f'out\\Balancing Areas\\{ba}'):
+        os.makedirs(f'out\\Balancing Areas\\{ba}')
+    plt.savefig(f'out\\Balancing Areas\\{ba}\\{ba} EIA 930 Generation Heatmap')
+    plt.savefig(f'out\\BA Charts by Type\\Generation Heatmaps\\{ba} EIA 930 Generation Heatmap')
     # plt.show()
 
     # Begin ramp heatmapping
@@ -111,12 +107,6 @@ for ba in bal_areas:
     
     plt.tight_layout()
 
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Generation Ramp Heatmaps')
-    plt.savefig(f'{ba} EIA 930 Generation Ramp Heatmap')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    try:
-        os.mkdir(f'{ba}')
-    except FileExistsError:
-        pass
-    plt.savefig(f'{ba}\\{ba} EIA 930 Generation Ramp Heatmap')
+    plt.savefig(f'out\\Balancing Areas\\{ba}\\{ba} EIA 930 Generation Ramp Heatmap')
+    plt.savefig(f'out\\BA Charts by Type\\Generation Ramp Heatmaps\\{ba} EIA 930 Generation Ramp Heatmap')
     # plt.show()

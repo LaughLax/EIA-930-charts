@@ -3,7 +3,7 @@ from multiprocessing import Pool
 import numpy as np
 import pandas as pd
 
-NUM_PROCESSES = 6
+NUM_PROCESSES = 3
 
 num_cols = {'Demand Forecast (MW)',
             'Demand (MW)',
@@ -30,7 +30,8 @@ non_wecc_areas = ['AEC', 'AECI', 'CPLE', 'CPLW', 'DEAA',
                   'LGEE', 'MISO', 'NSB', 'NYIS', 'OVEC',
                   'PJM', 'PSEI', 'SC', 'SCEG', 'SEC',
                   'SEPA', 'SOCO', 'SPA', 'SWPP', 'TAL',
-                  'TEC', 'TVA', 'YAD',]
+                  'TEC', 'TVA', 'YAD',
+                  ]
 
 
 def my_conv(num_str):
@@ -39,8 +40,9 @@ def my_conv(num_str):
     if num_str == '':
         return np.nan
     if ',' in num_str:
-        num_str = num_str.replace(',','')
+        num_str = num_str.replace(',', '')
     return int(num_str)
+
 
 def read_file(filename):
     print(f'Reading {filename}')
@@ -56,7 +58,8 @@ def read_file(filename):
         df = pd.read_excel(filename,
                            index_col=4,
                            na_filter=False,
-                           parse_dates=True)
+                           parse_dates=True,
+                           engine='openpyxl')
     
     # for ba in non_wecc_areas:
     #     df = df[df['Balancing Authority'] != ba]
@@ -66,6 +69,7 @@ def read_file(filename):
 
     return df
 
+
 def read_fileset(filenames):
     with Pool(NUM_PROCESSES) as p:
         dfs = p.map(read_file, filenames)    
@@ -73,9 +77,10 @@ def read_fileset(filenames):
     print('Combining data...')
     df_master = dfs[0]
     for i in range(1, len(dfs)):
-        df_master = df_master.append(dfs[i])
+        df_master = df_master.append(dfs[i], sort=True)
 
     return df_master
+
 
 if __name__ == '__main__':
     bal_raw = [# r'raw\EIA930_BALANCE_2021_Jul_Dec.csv',
@@ -91,7 +96,7 @@ if __name__ == '__main__':
                r'raw\EIA930_BALANCE_2016_Jul_Dec.csv',
                r'raw\EIA930_BALANCE_2016_Jan_Jun.csv',
                r'raw\EIA930_BALANCE_2015_Jul_Dec.csv',
-               ]
+    ]
 
     bal_mod = [# r'modified\EIA930_BALANCE_2021_Jul_Dec.xlsx',
                r'modified\EIA930_BALANCE_2021_Jan_Jun.xlsx',
@@ -106,7 +111,7 @@ if __name__ == '__main__':
                r'modified\EIA930_BALANCE_2016_Jul_Dec.xlsx',
                r'modified\EIA930_BALANCE_2016_Jan_Jun.xlsx',
                r'modified\EIA930_BALANCE_2015_Jul_Dec.xlsx',
-               ]
+    ]
     
     bal_recent = [# r'raw\EIA930_BALANCE_2021_Jul_Dec.csv',
                   r'raw\EIA930_BALANCE_2021_Jan_Jun.csv',
@@ -115,7 +120,7 @@ if __name__ == '__main__':
                   r'raw\EIA930_BALANCE_2019_Jul_Dec.csv',
                   r'raw\EIA930_BALANCE_2019_Jan_Jun.csv',
                   r'raw\EIA930_BALANCE_2018_Jul_Dec.csv',
-                  ]
+    ]
     
     bal_recent_mod = [# r'modified\EIA930_BALANCE_2021_Jul_Dec.xlsx',
                       r'modified\EIA930_BALANCE_2021_Jan_Jun.xlsx',
@@ -124,7 +129,7 @@ if __name__ == '__main__':
                       r'modified\EIA930_BALANCE_2019_Jul_Dec.xlsx',
                       r'modified\EIA930_BALANCE_2019_Jan_Jun.xlsx',
                       r'modified\EIA930_BALANCE_2018_Jul_Dec.xlsx',
-                      ]
+    ]
     
     interx = [# r'raw\EIA930_INTERCHANGE_2021_Jul_Dec.csv',
               r'raw\EIA930_INTERCHANGE_2021_Jan_Jun.csv',
@@ -138,7 +143,7 @@ if __name__ == '__main__':
               r'raw\EIA930_INTERCHANGE_2017_Jan_Jun.csv',
               r'raw\EIA930_INTERCHANGE_2016_Jul_Dec.csv',
               r'raw\EIA930_INTERCHANGE_2016_Jan_Jun.csv',
-              ]
+    ]
 
     subreg = [# r'raw\EIA930_SUBREGION_2021_Jul_Dec.csv',
               r'raw\EIA930_SUBREGION_2021_Jan_Jun.csv',
@@ -147,7 +152,7 @@ if __name__ == '__main__':
               r'raw\EIA930_SUBREGION_2019_Jul_Dec.csv',
               r'raw\EIA930_SUBREGION_2019_Jan_Jun.csv',
               r'raw\EIA930_SUBREGION_2018_Jul_Dec.csv',
-              ]        
+    ]
 
     print('BALANCE (all, raw)')
     print('Reading files...')

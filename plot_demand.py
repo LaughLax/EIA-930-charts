@@ -5,12 +5,10 @@ import matplotlib.pyplot as plt
 import plotly.offline as ply
 import plotly.graph_objs as go
 
-os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\modified')
-
 # Read from file
 print('Reading data...')
-# data = pd.read_pickle(r'Balance_Demand.pkl')
-data = pd.read_pickle(r'Balance_Demand_Mod.pkl')
+# data = pd.read_pickle(r'modified\Balance_Demand.pkl')
+data = pd.read_pickle(r'modified\Balance_Demand_Mod.pkl')
 
 other_cols = ['Demand (MW) (Adjusted)',
               'Net Generation (MW) (Adjusted)',
@@ -18,10 +16,15 @@ other_cols = ['Demand (MW) (Adjusted)',
 
 bal_areas = sorted(list(set(data.loc[:, 'Balancing Authority'])))
 
+if not os.path.exists(r'out\BA Charts by Type\Demand'):
+    os.makedirs(r'out\BA Charts by Type\Demand')
+if not os.path.exists(r'out\BA Charts by Type\Demand Ramp'):
+    os.makedirs(r'out\BA Charts by Type\Demand Ramp')
+
 for ba in bal_areas:
 # for ba in ['CISO']:
     print(f'\nBeginning processing for {ba}...')
-    data_sel = data.loc[data['Balancing Authority'] == ba, other_cols]
+    data_sel = data.loc[data['Balancing Authority'] == ba, other_cols].sort_index()
 
     gt_total = data_sel.sum(axis=0)
     disp_sel = gt_total[gt_total != 0].index
@@ -38,14 +41,10 @@ for ba in bal_areas:
     fig_sel = go.Figure(data=chart_sel, layout=layout)
 
     print('Creating plot...')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Demand')
-    ply.plot(fig_sel, filename=f'{ba} EIA 930 Demand.html', auto_open=False)
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    try:
-        os.mkdir(f'{ba}')
-    except FileExistsError:
-        pass
-    ply.plot(fig_sel, filename=f'{ba}\\{ba} EIA 930 Demand.html', auto_open=False)
+    if not os.path.exists(f'out\\Balancing Areas\\{ba}'):
+        os.makedirs(f'out\\Balancing Areas\\{ba}')
+    ply.plot(fig_sel, filename=f'out\\Balancing Areas\\{ba}\\{ba} EIA 930 Demand.html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\BA Charts by Type\\Demand\\{ba} EIA 930 Demand.html', auto_open=False)
     print('Plot created!')
 
     # Ramp data
@@ -63,12 +62,6 @@ for ba in bal_areas:
     fig_sel = go.Figure(data=chart_sel, layout=layout)
 
     print('Creating plot...')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Demand Ramp')
-    ply.plot(fig_sel, filename=f'{ba} EIA 930 Demand Ramp.html', auto_open=False)
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    try:
-        os.mkdir(f'{ba}')
-    except FileExistsError:
-        pass
-    ply.plot(fig_sel, filename=f'{ba}\\{ba} EIA 930 Demand Ramp.html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\Balancing Areas\\{ba}\\{ba} EIA 930 Demand Ramp.html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\BA Charts by Type\\Demand Ramp\\{ba} EIA 930 Demand Ramp.html', auto_open=False)
     print('Plot created!')

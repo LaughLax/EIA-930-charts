@@ -1,16 +1,12 @@
 import os
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import plotly.offline as ply
 import plotly.graph_objs as go
 
-os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\modified')
-
 # Read from file
 print('Reading data...')
-# data = pd.read_pickle(r'Balance_Grouped.pkl')
-data = pd.read_pickle(r'Balance_Grouped_Mod.pkl')
+data = pd.read_pickle(r'modified\Balance_Grouped.pkl')
+# data = pd.read_pickle(r'modified\Balance_Grouped_Mod.pkl')
 
 gentypes = ['Nuclear',
             'Coal',
@@ -24,6 +20,9 @@ gentypes = ['Nuclear',
 gencols = [f'Net Generation (MW) from {gen}' for gen in gentypes]
 
 bal_areas = sorted(list(set(data.loc[:, 'Balancing Authority'])))
+
+if not os.path.exists(r'out\BA Charts by Type\Generation Mix'):
+    os.makedirs(r'out\BA Charts by Type\Generation Mix')
 
 for ba in bal_areas:
     print(f'\nBeginning processing for {ba}...')
@@ -47,14 +46,11 @@ for ba in bal_areas:
     fig_sel = go.Figure(data=chart_sel, layout=layout)
 
     print('Creating plot...')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Generation Mix')
-    ply.plot(fig_sel, filename=f'{ba} EIA 930 Generation Sources.html', auto_open=False)
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    try:
-        os.mkdir(f'{ba}')
-    except FileExistsError:
-        pass
-    ply.plot(fig_sel, filename=f'{ba}\\{ba} EIA 930 Generation Sources.html', auto_open=False)
+
+    if not os.path.exists(f'out\\Balancing Areas\\{ba}'):
+        os.makedirs(f'out\\Balancing Areas\\{ba}')
+    ply.plot(fig_sel, filename=f'out\\Balancing Areas\\{ba}\\{ba} EIA 930 Generation Sources.html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\BA Charts by Type\\Generation Mix\\{ba} EIA 930 Generation Sources.html', auto_open=False)
     print('Plot created!')
 
     print('Final data shaping...')
@@ -77,13 +73,13 @@ for ba in bal_areas:
     fig_sel = go.Figure(data=chart_sel, layout=layout)
 
     print('Creating plot...')
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\BA Charts by Type\Generation Mix')
-    ply.plot(fig_sel, filename=f'{ba} EIA 930 Generation Sources (Percent).html', auto_open=False)
-    os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Balancing Areas')
-    ply.plot(fig_sel, filename=f'{ba}\\{ba} EIA 930 Generation Sources (Percent).html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\BA Charts by Type\\Generation Mix\\{ba} EIA 930 Generation Sources (Percent).html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\Balancing Areas\\{ba}\\{ba} EIA 930 Generation Sources (Percent).html', auto_open=False)
     print('Plot created!')
 
-os.chdir(r'C:\Users\dharalson\Desktop\local working folder\Misc\EIA 930\out\Fuel Sources')
+if not os.path.exists(r'out\Fuel Sources'):
+    os.makedirs(r'out\Fuel Sources')
+
 for gentype in gentypes:
     print(f'\nBeginning processing for {gentype}...')
     gen_str = f'Net Generation (MW) from {gentype}'
@@ -114,5 +110,5 @@ for gentype in gentypes:
     fig_sel = go.Figure(data=chart_sel, layout=layout)
 
     print('Creating plot...')
-    ply.plot(fig_sel, filename=f'{gentype}.html', auto_open=False)
+    ply.plot(fig_sel, filename=f'out\\Fuel Sources\\{gentype}.html', auto_open=False)
     print('Plot created!')
